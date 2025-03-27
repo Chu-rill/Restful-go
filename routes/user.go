@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"errors"
+
 	"github.com/Chu-rill/Restful-go/database"
 	"github.com/Chu-rill/Restful-go/models"
 	"github.com/gofiber/fiber/v2"
@@ -31,5 +33,38 @@ func CreateUser(c *fiber.Ctx)error{
 }
 
 func GetUsers(c *fiber.Ctx)error{
+	users := []models.User{}
 
+	database.Databse.Db.Find(&users)
+	responseUsers := []User{}
+	for _,user := range users{
+		responseUser := createResponseUser(user)
+		responseUsers = append(responseUsers,responseUser)
+	}
+	return c.Status(fiber.StatusCreated).JSON(responseUsers)
+
+}
+
+func findUser(id int,user *models.User)error{
+	 database.Databse.Db.First(&user,"id=?",id)
+	if user.ID == 0{
+		return errors.New("User not found")
+	}	
+	return nil
+
+}
+
+func GetUser(c *fiber.Ctx)error{
+	id,err := c.ParamsInt("id")
+
+	var user models.User
+	if err != nil{
+		return c.Status(fiber.StatusBadRequest).JSON("Please ensure that :id is an integer")
+	}
+	 
+	if err := findUser(id,&user);err != nil{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error":err.Error()})
+	}
+	responseUser := createResponseUser(user)
+	return c.Status(fiber.StatusOK).JSON(responseUser)
 }

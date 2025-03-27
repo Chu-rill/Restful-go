@@ -12,6 +12,7 @@ func setupRoutes(app *fiber.App){
 	app.Get("/api",welcome)
 	//User endpoints
 	app.Post("/api/users",routes.CreateUser)
+	app.Get("/api/users",routes.GetUsers)
 }
 
 func welcome(c *fiber.Ctx)error{
